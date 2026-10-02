@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+<robot name="morphle_automated_microscope">
+
+  <material name="matte_black"><color rgba="0.055 0.065 0.085 1"/></material>
+  <material name="lab_white"><color rgba="0.82 0.86 0.91 1"/></material>
+  <material name="anodized_blue"><color rgba="0.08 0.22 0.36 1"/></material>
+  <material name="brushed_aluminum"><color rgba="0.72 0.75 0.78 1"/></material>
+  <material name="dark_metal"><color rgba="0.16 0.18 0.21 1"/></material>
+  <material name="bearing_metal"><color rgba="0.48 0.52 0.56 1"/></material>
+  <material name="glass"><color rgba="0.25 0.75 0.88 0.38"/></material>
+  <material name="cell_red"><color rgba="0.95 0.08 0.16 0.92"/></material>
+  <material name="cell_pink"><color rgba="1 0.32 0.52 0.90"/></material>
+
+  <link name="base_link">
+    <visual><origin xyz="0 0 0.05"/><geometry><box size="0.60 0.45 0.10"/></geometry><material name="matte_black"/></visual>
+    <collision><origin xyz="0 0 0.05"/><geometry><box size="0.60 0.45 0.10"/></geometry></collision>
+  </link>
+
+  <link name="microscope_column">
+    <visual><origin xyz="0 0 0.20"/><geometry><box size="0.15 0.20 0.40"/></geometry><material name="lab_white"/></visual>
+    <collision><origin xyz="0 0 0.20"/><geometry><box size="0.15 0.20 0.40"/></geometry></collision>
+  </link>
+  <joint name="column_mount" type="fixed"><parent link="base_link"/><child link="microscope_column"/><origin xyz="0.20 0 0.10"/></joint>
+
+  <link name="microscope_arm">
+    <visual><origin xyz="-0.15 0 0.05"/><geometry><box size="0.30 0.15 0.10"/></geometry><material name="lab_white"/></visual>
+    <collision><origin xyz="-0.15 0 0.05"/><geometry><box size="0.30 0.15 0.10"/></geometry></collision>
+  </link>
+  <joint name="arm_mount" type="fixed"><parent link="microscope_column"/><child link="microscope_arm"/><origin xyz="0 0 0.35"/></joint>
+
+  <link name="camera_link">
+    <visual><origin xyz="0 0 0.05"/><geometry><cylinder radius="0.04" length="0.10"/></geometry><material name="matte_black"/></visual>
+    <visual><origin xyz="0 0 -0.02"/><geometry><cylinder radius="0.02" length="0.04"/></geometry><material name="dark_metal"/></visual>
+    <visual><origin xyz="0 0 -0.045"/><geometry><cylinder radius="0.012" length="0.01"/></geometry><material name="glass"/></visual>
+  </link>
+  <joint name="camera_mount" type="fixed"><parent link="microscope_column"/><child link="camera_link"/><origin xyz="-0.20 0 0.30"/></joint>
+
+  <link name="x_stage">
+    <visual><origin xyz="0 0 0.02"/><geometry><box size="0.25 0.35 0.04"/></geometry><material name="anodized_blue"/></visual>
+    <collision><origin xyz="0 0 0.02"/><geometry><box size="0.25 0.35 0.04"/></geometry></collision>
+  </link>
+  <joint name="x_joint" type="prismatic">
+    <parent link="base_link"/><child link="x_stage"/><origin xyz="0 0 0.10"/>
+    <axis xyz="1 0 0"/><limit lower="-0.10" upper="0.10" effort="50" velocity="0.10"/>
+  </joint>
+
+  <link name="y_stage">
+    <visual><origin xyz="0 0 0.02"/><geometry><box size="0.20 0.20 0.04"/></geometry><material name="brushed_aluminum"/></visual>
+    <collision><origin xyz="0 0 0.02"/><geometry><box size="0.20 0.20 0.04"/></geometry></collision>
+  </link>
+  <joint name="y_joint" type="prismatic">
+    <parent link="x_stage"/><child link="y_stage"/><origin xyz="0 0 0.04"/>
+    <axis xyz="0 1 0"/><limit lower="-0.08" upper="0.08" effort="40" velocity="0.10"/>
+  </joint>
+
+  <link name="z_stage">
+    <visual><origin xyz="0 0 0.015"/><geometry><box size="0.18 0.18 0.03"/></geometry><material name="anodized_blue"/></visual>
+    <collision><origin xyz="0 0 0.015"/><geometry><box size="0.18 0.18 0.03"/></geometry></collision>
+  </link>
+  <joint name="z_joint" type="prismatic">
+    <parent link="y_stage"/><child link="z_stage"/><origin xyz="0 0 0.04"/>
+    <axis xyz="0 0 1"/><limit lower="0" upper="0.05" effort="30" velocity="0.05"/>
+  </joint>
+
+  <link name="glass_slide">
+    <visual><origin xyz="0 0 0.002"/><geometry><box size="0.12 0.06 0.004"/></geometry><material name="glass"/></visual>
+    <collision><origin xyz="0 0 0.002"/><geometry><box size="0.12 0.06 0.004"/></geometry></collision>
+  </link>
+  <joint name="slide_mount" type="fixed"><parent link="z_stage"/><child link="glass_slide"/><origin xyz="0 0 0.03"/></joint>
+
+  <link name="sample_1"><visual><geometry><sphere radius="0.005"/></geometry><material name="cell_red"/></visual></link>
+  <joint name="sample_1_mount" type="fixed"><parent link="glass_slide"/><child link="sample_1"/><origin xyz="-0.02 0.01 0.004"/></joint>
+  <link name="sample_2"><visual><geometry><sphere radius="0.003"/></geometry><material name="cell_pink"/></visual></link>
+  <joint name="sample_2_mount" type="fixed"><parent link="glass_slide"/><child link="sample_2"/><origin xyz="0.01 -0.015 0.004"/></joint>
+
+  <gazebo reference="base_link">
+    <sensor name="microscope_camera" type="camera">
+      <pose>0 0 0.10 0 1.5708 0</pose>
+      <update_rate>30</update_rate>
+      <visualize>true</visualize>
+      <camera>
+        <horizontal_fov>0.85</horizontal_fov>
+        <image><width>1920</width><height>1080</height><format>R8G8B8</format></image>
+        <clip><near>0.01</near><far>0.5</far></clip>
+      </camera>
+    </sensor>
+  </gazebo>
+
+  <ros2_control name="GazeboSystem" type="system">
+    <hardware><plugin>gz_ros2_control/GazeboSimSystem</plugin></hardware>
+    <joint name="x_joint"><command_interface name="velocity"/><state_interface name="position"/><state_interface name="velocity"/></joint>
+    <joint name="y_joint"><command_interface name="velocity"/><state_interface name="position"/><state_interface name="velocity"/></joint>
+    <joint name="z_joint"><command_interface name="velocity"/><state_interface name="position"/><state_interface name="velocity"/></joint>
+  </ros2_control>
+
+  <gazebo>
+    <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+      <parameters>/home/kp/morphle_ws/install/morphle_stage/share/morphle_stage/config/controllers.yaml</parameters>
+    </plugin>
+  </gazebo>
+</robot>
