@@ -1,0 +1,14 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 100
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+    stage_velocity_controller:
+      type: velocity_controllers/JointGroupVelocityController
+
+stage_velocity_controller:
+  ros__parameters:
+    joints:
+      - x_joint
+      - y_joint
+      - z_joint
